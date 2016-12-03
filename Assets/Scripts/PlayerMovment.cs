@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
-public class PlayerMovment : MonoBehaviour
+public class PlayerMovment : NetworkBehaviour
 {
 
     public float movementSpeed = 10;
@@ -9,6 +10,11 @@ public class PlayerMovment : MonoBehaviour
 
     void Update()
     {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
         float horizontal = Input.GetAxis("Horizontal") * turningSpeed * Time.deltaTime;
         transform.Rotate(0, horizontal, 0);
 

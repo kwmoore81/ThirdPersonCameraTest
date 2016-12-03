@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
-public class ThirdPersonCamera : MonoBehaviour {
+public class ThirdPersonCamera : MonoBehaviour
+{
 
     public GameObject target;
    // GameObject cameraFocus;
@@ -11,14 +13,11 @@ public class ThirdPersonCamera : MonoBehaviour {
     
     void Start()
     {
-      
         //offset = target.transform.position - transform.position;
-       
     }
 
     void LateUpdate()
     {
-
         float currentAngle = transform.eulerAngles.y;
         float desiredAngle = target.transform.eulerAngles.y;
         float angle = Mathf.LerpAngle(currentAngle, desiredAngle, Time.deltaTime * damping);

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Runtime.InteropServices;
+using UnityEngine.Networking;
 
 public enum Weapon 
 {
@@ -8,12 +9,13 @@ public enum Weapon
 	RELAX = 8
 }
 	
-public class RPGCharacterControllerFREE : MonoBehaviour 
+public class RPGCharacterControllerFREE : NetworkBehaviour
 {
-	#region Variables
+    
+    #region Variables
 
-	//Components
-	Rigidbody rb;
+    //Components
+    Rigidbody rb;
 	protected Animator animator;
 	public GameObject target;
 	private Vector3 targetDashDirection;
@@ -72,18 +74,26 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 	public float knockbackMultiplier = 1f;
 	bool isKnockback;
 
-	#endregion
+    //Added Stuff
+    WinScreen winScreen;
+    private AudioSource mAudioSource = null;
+    public AudioClip CoinSound = null;
+    int score = 0;
+    int scoreMax = 5;
 
-	#region Initialization
+    #endregion
 
-	void Start() 
+    #region Initialization
+
+    void Start() 
 	{
         sceneCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        
+        winScreen = GameObject.FindGameObjectWithTag("WorldController").GetComponent<WinScreen>();
 		//set the animator component
 		animator = GetComponentInChildren<Animator>();
 		rb = GetComponent<Rigidbody>();
-	}
+        mAudioSource = GetComponent<AudioSource>();
+    }
 
 	#endregion
 	
@@ -91,9 +101,12 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 	
 	void Update()
 	{
-		
-		//make sure there is animator on character
-		if(animator)
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+        //make sure there is animator on character
+        if (animator)
 		{
 			if(canMove && !isBlocking && !isDead)
 			{
@@ -164,7 +177,12 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 	
 	void FixedUpdate()
 	{
-		CheckForGrounded();
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        CheckForGrounded();
 		//apply gravity force
 		rb.AddForce(0, gravity, 0, ForceMode.Acceleration);
 		AirControl();
@@ -189,8 +207,13 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 	//get velocity of rigid body and pass the value to the animator to control the animations
 	void LateUpdate()
 	{
-		//Get local velocity of charcter
-		float velocityXel = transform.InverseTransformDirection(rb.velocity).x;
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        //Get local velocity of charcter
+        float velocityXel = transform.InverseTransformDirection(rb.velocity).x;
 		float velocityZel = transform.InverseTransformDirection(rb.velocity).z;
 		//Update animator with movement values
 		animator.SetFloat("Velocity X", velocityXel / runSpeed);
@@ -250,7 +273,8 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 
 	float UpdateMovement()
 	{
-		CameraRelativeMovement();  
+      
+        CameraRelativeMovement();  
 		Vector3 motion = inputVec;
 		if(isGrounded)
 		{
@@ -342,7 +366,7 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 		{
 			if(canJump && Input.GetButtonDown("Jump"))
 			{
-				StartCoroutine(_Jump());
+				//StartCoroutine(_Jump());
 			}
 		}
 		else
@@ -796,5 +820,23 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 		}
 	}
 
-	#endregion
+    #endregion
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag.Equals("Coin"))
+        {
+            score++;
+
+            if (mAudioSource != null && CoinSound != null)
+            {
+                mAudioSource.PlayOneShot(CoinSound);
+            }
+            Destroy(other.gameObject);
+
+            if (score >= scoreMax)
+            {
+                winScreen.gameOver();
+            }
+        }
+    }
 }
