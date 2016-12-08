@@ -75,11 +75,12 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
 	bool isKnockback;
 
     //Added Stuff
-    WinScreen winScreen;
+    public PlayerScore playerscore;
     private AudioSource mAudioSource = null;
     public AudioClip CoinSound = null;
-    int score = 0;
-    int scoreMax = 5;
+    public int score = 0;
+    public int scoreMax = 10;
+    WinScreen winScreen;
 
     #endregion
 
@@ -88,9 +89,10 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
     void Start() 
 	{
         sceneCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        playerscore = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<PlayerScore>();
         winScreen = GameObject.FindGameObjectWithTag("WorldController").GetComponent<WinScreen>();
-		//set the animator component
-		animator = GetComponentInChildren<Animator>();
+        //set the animator component
+        animator = GetComponentInChildren<Animator>();
 		rb = GetComponent<Rigidbody>();
         mAudioSource = GetComponent<AudioSource>();
     }
@@ -826,6 +828,11 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
         if (other.gameObject.tag.Equals("Coin"))
         {
             score++;
+
+            if (isLocalPlayer)
+            {
+                playerscore.AddScore(score);
+            }
 
             if (mAudioSource != null && CoinSound != null)
             {
