@@ -81,6 +81,18 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
     public int score = 0;
     public int scoreMax = 10;
     WinScreen winScreen;
+    public TextMesh playerNameColor;
+    public ConnectedPlayersVar connectedPlayers;
+
+    [SyncVar]
+    public string playerName = "Player";
+
+
+    public string player1 = "Player 1";
+    public string player2 = "Player 2";
+    public string player3 = "Player 3";
+    public string player4 = "Player 4";
+   
 
     #endregion
 
@@ -88,13 +100,21 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
 
     void Start() 
 	{
+
         sceneCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         playerscore = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<PlayerScore>();
         winScreen = GameObject.FindGameObjectWithTag("WorldController").GetComponent<WinScreen>();
+        playerNameColor = GameObject.FindGameObjectWithTag("PlayerName").GetComponent<TextMesh>();
+        connectedPlayers = GameObject.FindGameObjectWithTag("WorldController").GetComponent<ConnectedPlayersVar>();
         //set the animator component
         animator = GetComponentInChildren<Animator>();
 		rb = GetComponent<Rigidbody>();
         mAudioSource = GetComponent<AudioSource>();
+
+        if (isLocalPlayer)
+        {
+            PlayerTitle();
+        }
     }
 
 	#endregion
@@ -821,6 +841,38 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
 			}
 		}
 	}
+
+    
+    void PlayerTitle()
+    {
+
+        if (connectedPlayers.p1 == false)
+        {
+            playerName = player1;
+            playerNameColor.color = Color.red;
+            connectedPlayers.p1 = true;
+        }
+        else if (connectedPlayers.p2 == false && connectedPlayers.p1 == true)
+        {
+            playerName = player2;
+            playerNameColor.color = Color.blue;
+            connectedPlayers.p2 = true;
+        }
+        else if (connectedPlayers.p3 == false && connectedPlayers.p1 == true && connectedPlayers.p2 == true)
+        {
+            playerName = player3;
+            playerNameColor.color = Color.yellow;
+            connectedPlayers.p3 = true;
+        }
+        else if(connectedPlayers.p4 == false && connectedPlayers.p1 == true && connectedPlayers.p2 == true && connectedPlayers.p3 == true)
+        {
+            playerName = player4;
+            playerNameColor.color = Color.magenta;
+            connectedPlayers.p4 = true;
+        }
+     
+        playerNameColor.text = playerName;
+    }
 
     #endregion
     void OnTriggerEnter(Collider other)
