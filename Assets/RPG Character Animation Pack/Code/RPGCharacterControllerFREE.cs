@@ -81,18 +81,17 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
     public int score = 0;
     public int scoreMax = 10;
     WinScreen winScreen;
-    public TextMesh playerNameColor;
+    //public TextMesh playerNameColor;
     public ConnectedPlayersVar connectedPlayers;
+    public Sprite RedBall;  
+    public Sprite BlueBall;   
+    public Sprite GreenBall;    
+    public Sprite PurpleBall;
+    public SpriteRenderer PlayerColor;
 
-    [SyncVar]
-    public string playerName = "Player";
-
-
-    public string player1 = "Player 1";
-    public string player2 = "Player 2";
-    public string player3 = "Player 3";
-    public string player4 = "Player 4";
-   
+    
+    [SyncVar(hook ="RpcSetupPlayer")]
+    public int playerID = 0;
 
     #endregion
 
@@ -100,20 +99,49 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
 
     void Start() 
 	{
-
+        
+        
         sceneCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         playerscore = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<PlayerScore>();
         winScreen = GameObject.FindGameObjectWithTag("WorldController").GetComponent<WinScreen>();
-        playerNameColor = GameObject.FindGameObjectWithTag("PlayerName").GetComponent<TextMesh>();
         connectedPlayers = GameObject.FindGameObjectWithTag("WorldController").GetComponent<ConnectedPlayersVar>();
         //set the animator component
         animator = GetComponentInChildren<Animator>();
 		rb = GetComponent<Rigidbody>();
         mAudioSource = GetComponent<AudioSource>();
 
-        if (isLocalPlayer)
+        if (isServer)
         {
-            PlayerTitle();
+            connectedPlayers.ProvisionPlayer(gameObject);           
+        }
+
+        //if (isLocalPlayer)
+        //{
+        //    PlayerColorID();
+        //}
+
+    }
+
+    [ClientRpc]
+    public void RpcSetupPlayer(int val)
+    {
+        playerID = val;
+
+        if (playerID == 0)
+        {
+            PlayerColor.sprite = RedBall;
+        }
+        else if (playerID == 1)
+        {
+            PlayerColor.sprite = BlueBall;
+        }
+        else if (playerID == 2)
+        {
+            PlayerColor.sprite = GreenBall;
+        }
+        else if (playerID == 3)
+        {
+            PlayerColor.sprite = PurpleBall;
         }
     }
 
@@ -741,138 +769,130 @@ public class RPGCharacterControllerFREE : NetworkBehaviour
 
 	#region GUI
 
-	void OnGUI()
-	{
-		if(!isDead)
-		{
-			if(canAction && !isRelax)
-			{
-				if(isGrounded)
-				{
-					if(!isBlocking)
-					{
-						if(!isBlocking)
-						{
-							if(GUI.Button(new Rect(25, 15, 100, 30), "Roll Forward"))
-							{
-								targetDashDirection = transform.forward;
-								StartCoroutine(_Roll(1));
-							}
-							if(GUI.Button(new Rect(130, 15, 100, 30), "Roll Backward"))
-							{
-								targetDashDirection = -transform.forward;
-								StartCoroutine(_Roll(3));
-							}
-							if(GUI.Button(new Rect(25, 45, 100, 30), "Roll Left"))
-							{
-								targetDashDirection = -transform.right;
-								StartCoroutine(_Roll(4));
-							}
-							if(GUI.Button(new Rect(130, 45, 100, 30), "Roll Right"))
-							{
-								targetDashDirection = transform.right;
-								StartCoroutine(_Roll(2));
-							}
-							//ATTACK LEFT
-							if(GUI.Button(new Rect(25, 85, 100, 30), "Attack L"))
-							{
-								Attack(1);
-							}
-							//ATTACK RIGHT
-							if(GUI.Button(new Rect(130, 85, 100, 30), "Attack R"))
-							{
-								Attack(2);
-							}
-							if(weapon == Weapon.UNARMED) 
-							{
-								if(GUI.Button (new Rect (25, 115, 100, 30), "Left Kick")) 
-								{
-									AttackKick (1);
-								}
-								if(GUI.Button (new Rect (130, 115, 100, 30), "Right Kick")) 
-								{
-									AttackKick (2);
-								}
-							}
-							if(GUI.Button(new Rect(30, 240, 100, 30), "Get Hit"))
-							{
-								GetHit();
-							}
-						}
-					}
-				}
-				if(canJump || canDoubleJump)
-				{
-					if(isGrounded)
-					{
-						if(GUI.Button(new Rect(25, 165, 100, 30), "Jump"))
-						{
-							if(canJump && isGrounded)
-							{
-								StartCoroutine(_Jump());
-							}
-						}
-					} 
-					else
-					{
-						if(GUI.Button(new Rect(25, 165, 100, 30), "Double Jump"))
-						{
-							if(canDoubleJump && !isDoubleJumping)
-							{
-								StartCoroutine(_Jump());
-							}
-						}
-					}
-				}
-				if(!isBlocking && isGrounded)
-				{
-					if(GUI.Button(new Rect(30, 270, 100, 30), "Death"))
-					{
-						StartCoroutine(_Death());
-					}
-				}
-			}
-		}
-		if(isDead)
-		{
-			if(GUI.Button(new Rect(30, 270, 100, 30), "Revive"))
-			{
-				StartCoroutine(_Revive());
-			}
-		}
-	}
+	//void OnGUI()
+	//{
+	//	if(!isDead)
+	//	{
+	//		if(canAction && !isRelax)
+	//		{
+	//			if(isGrounded)
+	//			{
+	//				if(!isBlocking)
+	//				{
+	//					if(!isBlocking)
+	//					{
+	//						if(GUI.Button(new Rect(25, 15, 100, 30), "Roll Forward"))
+	//						{
+	//							targetDashDirection = transform.forward;
+	//							StartCoroutine(_Roll(1));
+	//						}
+	//						if(GUI.Button(new Rect(130, 15, 100, 30), "Roll Backward"))
+	//						{
+	//							targetDashDirection = -transform.forward;
+	//							StartCoroutine(_Roll(3));
+	//						}
+	//						if(GUI.Button(new Rect(25, 45, 100, 30), "Roll Left"))
+	//						{
+	//							targetDashDirection = -transform.right;
+	//							StartCoroutine(_Roll(4));
+	//						}
+	//						if(GUI.Button(new Rect(130, 45, 100, 30), "Roll Right"))
+	//						{
+	//							targetDashDirection = transform.right;
+	//							StartCoroutine(_Roll(2));
+	//						}
+	//						//ATTACK LEFT
+	//						if(GUI.Button(new Rect(25, 85, 100, 30), "Attack L"))
+	//						{
+	//							Attack(1);
+	//						}
+	//						//ATTACK RIGHT
+	//						if(GUI.Button(new Rect(130, 85, 100, 30), "Attack R"))
+	//						{
+	//							Attack(2);
+	//						}
+	//						if(weapon == Weapon.UNARMED) 
+	//						{
+	//							if(GUI.Button (new Rect (25, 115, 100, 30), "Left Kick")) 
+	//							{
+	//								AttackKick (1);
+	//							}
+	//							if(GUI.Button (new Rect (130, 115, 100, 30), "Right Kick")) 
+	//							{
+	//								AttackKick (2);
+	//							}
+	//						}
+	//						if(GUI.Button(new Rect(30, 240, 100, 30), "Get Hit"))
+	//						{
+	//							GetHit();
+	//						}
+	//					}
+	//				}
+	//			}
+	//			if(canJump || canDoubleJump)
+	//			{
+	//				if(isGrounded)
+	//				{
+	//					if(GUI.Button(new Rect(25, 165, 100, 30), "Jump"))
+	//					{
+	//						if(canJump && isGrounded)
+	//						{
+	//							StartCoroutine(_Jump());
+	//						}
+	//					}
+	//				} 
+	//				else
+	//				{
+	//					if(GUI.Button(new Rect(25, 165, 100, 30), "Double Jump"))
+	//					{
+	//						if(canDoubleJump && !isDoubleJumping)
+	//						{
+	//							StartCoroutine(_Jump());
+	//						}
+	//					}
+	//				}dawd
+	//			}
+	//			if(!isBlocking && isGrounded)
+	//			{
+	//				if(GUI.Button(new Rect(30, 270, 100, 30), "Death"))
+	//				{
+	//					StartCoroutine(_Death());
+	//				}
+	//			}
+	//		}
+	//	}
+	//	if(isDead)
+	//	{
+	//		if(GUI.Button(new Rect(30, 270, 100, 30), "Revive"))
+	//		{
+	//			StartCoroutine(_Revive());
+	//		}
+	//	}
+	//}
 
-    
-    void PlayerTitle()
-    {
-
-        if (connectedPlayers.p1 == false)
-        {
-            playerName = player1;
-            playerNameColor.color = Color.red;
-            connectedPlayers.p1 = true;
-        }
-        else if (connectedPlayers.p2 == false && connectedPlayers.p1 == true)
-        {
-            playerName = player2;
-            playerNameColor.color = Color.blue;
-            connectedPlayers.p2 = true;
-        }
-        else if (connectedPlayers.p3 == false && connectedPlayers.p1 == true && connectedPlayers.p2 == true)
-        {
-            playerName = player3;
-            playerNameColor.color = Color.yellow;
-            connectedPlayers.p3 = true;
-        }
-        else if(connectedPlayers.p4 == false && connectedPlayers.p1 == true && connectedPlayers.p2 == true && connectedPlayers.p3 == true)
-        {
-            playerName = player4;
-            playerNameColor.color = Color.magenta;
-            connectedPlayers.p4 = true;
-        }
-     
-        playerNameColor.text = playerName;
-    }
+    //void PlayerColorID()
+    //{
+    //    if (isLocalPlayer)
+    //    {
+    //        if (playerID == 0)
+    //        {
+    //            PlayerColor.sprite = RedBall;
+    //        }
+    //        else if (playerID == 1)
+    //        {
+    //            PlayerColor.sprite = BlueBall;
+    //        }
+    //        else if (playerID == 2)
+    //        {
+    //            PlayerColor.sprite = GreenBall;
+    //        }
+    //        else if (playerID == 3)
+    //        {
+    //            PlayerColor.sprite = PurpleBall;
+    //        }
+    //    }    
+    //    //playerNameColor.text = playerName;
+    //}
 
     #endregion
     void OnTriggerEnter(Collider other)

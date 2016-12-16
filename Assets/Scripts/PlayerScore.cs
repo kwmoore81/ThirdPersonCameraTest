@@ -7,7 +7,7 @@ public class PlayerScore : MonoBehaviour {
    
     public void AddScore(int score)
     {      
-        scoreText.text = "SCORE " + score; 
+        scoreText.text = "COINS: " + score; 
     }
   
 }

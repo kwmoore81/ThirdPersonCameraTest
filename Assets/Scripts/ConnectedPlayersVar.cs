@@ -1,20 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
-public class ConnectedPlayersVar : MonoBehaviour
-{
-    public bool p1;
-    public bool p2;
-    public bool p3;
-    public bool p4;
+public class ConnectedPlayersVar : NetworkBehaviour
+{    
+    [SyncVar]
+    private int counter = 0;
 
-
-    void Start()
+    [Server]
+    public void ProvisionPlayer(GameObject playerobject)
     {
-        p1 = false;
-        p2 = false;
-        p3 = false;
-        p4 = false;
+        
+        var player = playerobject.GetComponent<RPGCharacterControllerFREE>();
+        if(player != null)
+        {
+            Debug.Log("Provisioning..");
+            player.playerID = counter++;
+        }
     }
-
 }
